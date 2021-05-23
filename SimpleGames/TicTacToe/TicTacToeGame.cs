@@ -40,6 +40,11 @@ namespace SimpleGames.TicTacToe
 					Winner = Player2;
 				}
 			}
+
+			if (Board.IsFull())
+			{
+				GameIsOver = true;
+			}
 		}
 	}
 }

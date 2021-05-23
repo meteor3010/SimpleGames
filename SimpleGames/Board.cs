@@ -8,17 +8,15 @@ namespace SimpleGames
 	{
 		internal readonly int[,] m_Board;
 
+		public int RowCount { get; set; }
+		public int ColCount { get; set; }
+
 		public Board(int row, int col)
 		{
 			m_Board = new int[row, col];
+			RowCount = row;
+			ColCount = col;
 
-			for (int i = 0; i < row; i++)
-			{
-				for (int j = 0; j < col; j++)
-				{
-					m_Board[i, j] = 0;
-				}
-			}
 		}
 
 		public int this[string position]
@@ -46,6 +44,20 @@ namespace SimpleGames
 			int r = position[0] - 97;
 			int c = position[1] - 49;
 			return r < 3 && c < 3;
+		}
+
+		public bool IsFull()
+		{
+			var isFull = true;
+			for (int i = 0; i < RowCount; i++)
+			{
+				for (int j = 0; j < ColCount; j++)
+				{
+					isFull &= m_Board[i, j] != 0;
+				}
+			}
+
+			return isFull;
 		}
 	}
 }

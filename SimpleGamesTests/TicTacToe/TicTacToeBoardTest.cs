@@ -21,6 +21,32 @@ namespace SimpleGamesTests
 			Assert.Equal(expected, result);
 		}
 
+		[Theory]
+		[InlineData(1, true)]
+		[InlineData(0, false)]
+		public void TTT_IsFull_IsFull(int value, bool expected)
+		{
+			// prepare
+			TicTacToeBoard board = new TicTacToeBoard();
+
+			//full board as tie
+			board["a1"] = 1;
+			board["a2"] = -1;
+			board["a3"] = value;
+			board["b1"] = 1;
+			board["b2"] = -1;
+			board["b3"] = 1;
+			board["c1"] = -1;
+			board["c2"] = 1;
+			board["c3"] = -1;
+
+			// execute
+			var result = board.IsFull();
+
+			// verify
+			Assert.Equal(expected, result);
+		}
+
 		public static TheoryData<Board, bool> HasWinner_DataSource()
 		{
 			var theoryData = new TheoryData<Board, bool>();
