@@ -43,40 +43,16 @@ namespace SimpleGames.Players
 			Inputs.Add(input);
 			Random random = new Random(Guid.NewGuid().GetHashCode());
 			double[] guess;
-			//exploitation
-			if (TrainingMode || random.Next(10) < 8)
+
+			if (!TrainingMode)
 			{
 				guess = IA.Predict(input);
-				var expected = guess.ToArray();
-				bool learnRules;
-				
-				if (!TrainingMode)
-					return SelectPositionFromGuesses(guess, board);
-				
-				do
-				{
-					learnRules = false;
-					for (int i = 0; i < NInput; i++)
-					{
-						if (input[i] != 0.5)
-						{
-							expected[i] = 0;
-							if (guess[i] > 0.1)
-							{
-								learnRules = true;
-							}
-						}
-					}
-
-					if (learnRules)
-					{
-						HasToLearn++;
-						IA.Train(input, expected);
-						guess = IA.Predict(input);
-					}
-
-				} while (learnRules);
 				return SelectPositionFromGuesses(guess, board);
+			}
+			//exploitation
+			if (random.Next(10) < 8)
+			{
+				return Exploitation(board, input, out guess);
 			}
 			//exploration
 			var n = random.Next(input.Count(i => i == 0.5));
@@ -99,18 +75,52 @@ namespace SimpleGames.Players
 			throw new GameLogicException("The IA Couldnot find a position to play !!");
 		}
 
+		private string Exploitation(Board board, double[] input, out double[] guess)
+		{
+			guess = IA.Predict(input);
+			var expected = guess.ToArray();
+			bool learnRules;
+
+			if (!TrainingMode)
+				return SelectPositionFromGuesses(guess, board);
+
+			do
+			{
+				learnRules = false;
+				for (int i = 0; i < NInput; i++)
+				{
+					if (input[i] != 0.5)
+					{
+						expected[i] = 0;
+						if (guess[i] > 0.1)
+						{
+							learnRules = true;
+						}
+					}
+				}
+
+				if (learnRules)
+				{
+					HasToLearn++;
+					IA.Train(input, expected);
+					guess = IA.Predict(input);
+				}
+
+			} while (learnRules);
+			return SelectPositionFromGuesses(guess, board);
+		}
 
 		internal override void ProcessEndGame(bool hasWon)
 		{
 			base.ProcessEndGame(hasWon);
-			if (hasWon && !TrainingMode)
+			if (hasWon && TrainingMode)
 			{
 				int i = 0;
 				foreach (var input in Inputs)
 				{
-					for (int j = 0; j <= i; j++)
+					for (int j = 0; j <= i*10; j++)
 					{
-						var expected = input.Select(e => { return (e == 0.5) ? 0.0 : 1.0; }).ToArray();
+						var expected = input.Select(e => 0.0).ToArray();
 						expected[GuessPosition[i]] = 1;
 						IA.Train(input, expected);
 					}

@@ -86,19 +86,28 @@ namespace SimpleGames
 
 		private static void IaVsRandom()
 		{
-			Mode.RenderOn = false;
-			var r1 = new RandomPlayer();
-			var p1 = new IaPlayer("robot1", false) { FirstPlayer = true };
-			var p2 = new IaPlayer("robot2", false) { FirstPlayer = false };
-			for (int i = 0; i < 50000; i++)
 			{
-				P1turn = !P1turn;
-				var ttt = new TicTacToeGame(p1, r1 , P1turn);
-				ttt.Start();
-				NumberOfGames++;
+
+				Mode.RenderOn = false;
+				var p1 = new IaPlayer("robot1", false) { FirstPlayer = true };
+				var path = @"C:\Users\Boudart Loic\source\repos\SimpleGames\SimpleGames\TicTacToe\Brains\brain.json";
+				if (File.Exists(path))
+				{
+					p1.IA.Load(path);
+				}
+				var p2 = new IaPlayer("robot1", false) { FirstPlayer = false };
+				for (int i = 0; i < 100000; i++)
+				{
+					P1turn = !P1turn;
+					var ttt = new TicTacToeGame(p1, p2, P1turn);
+					ttt.Start();
+					NumberOfGames++;
+				}
+
+				Console.WriteLine("IA trained :  " + 100 * p1.NumberOfGamesWon * 1.0 / NumberOfGames + "%");
+				Console.WriteLine("IA untrained : " + 100 * p2.NumberOfGamesWon * 1.0 / NumberOfGames + "%");
 			}
-			Console.WriteLine("IA :  " + 100 * p1.NumberOfGamesWon * 1.0 / NumberOfGames + "%");
-			Console.WriteLine("random : " + 100 * p2.NumberOfGamesWon * 1.0 / NumberOfGames + "%");
+
 			Console.ReadLine();
 		}
 	}
