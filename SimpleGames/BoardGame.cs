@@ -15,11 +15,11 @@ namespace SimpleGames
 		public bool GameIsOver { get; protected set; }
 		public Player Winner { get; protected set; }
 
-		public BoardGame(Player player1, Player player2)
+		public BoardGame(Player player1, Player player2, bool player1Turn)
 		{
 			Player1 = player1;
 			Player2 = player2;
-			IsPlayer1Turn = true;
+			IsPlayer1Turn = player1Turn;
 		}
 
 		public void Start()
@@ -57,7 +57,6 @@ namespace SimpleGames
 		{
 			Player1.ProcessEndGame(player == Player1);
 			Player2.ProcessEndGame(player == Player2);
-
 			if (Mode.RenderOn)
 			{
 				if (player != null)

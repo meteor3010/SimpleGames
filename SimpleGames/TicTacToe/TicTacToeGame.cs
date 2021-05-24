@@ -8,7 +8,7 @@ namespace SimpleGames.TicTacToe
 {
 	public class TicTacToeGame : BoardGame
 	{
-		public TicTacToeGame(Player player1, Player player2): base(player1, player2)
+		public TicTacToeGame(Player player1, Player player2, bool p1turn): base(player1, player2, p1turn)
 		{
 			Board = new TicTacToeBoard();
 		}

@@ -1,4 +1,5 @@
 ﻿using MachineLearning;
+using SimpleGames.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,12 +14,15 @@ namespace SimpleGames.Players
 		private int NOutput = 9;
 		private int NeuronsPerLayers = 18;
 		private int NLayers = 2;
-		private List<double[]> Inputs;
-		private List<int> GuessPosition;
-		public int NumberOfGamesWon { get; set; }
+		private readonly List<double[]> Inputs;
+		private readonly List<int> GuessPosition;
 		public bool FirstPlayer { get; set; }
 
-		public IaPlayer(string name) : base(name)
+		private List<int> NumberOfWrongPositions { get; set; }
+		public bool TrainingMode { get; set; }
+
+		private int HasToLearn;
+		public IaPlayer(string name, bool trainingMode = true) : base(name)
 		{
 			NInput = 9;
 			NOutput = 9;
@@ -28,6 +32,8 @@ namespace SimpleGames.Players
 			IA = new DeepLearning(NInput, NeuronsPerLayers, NOutput, NLayers);
 			Inputs = new List<double[]>();
 			GuessPosition = new List<int>();
+			NumberOfWrongPositions = new List<int>();
+			TrainingMode = trainingMode;
 		}
 
 		public override string Play(Board board)
@@ -35,39 +41,103 @@ namespace SimpleGames.Players
 			// [0, 1, 0.5, 0.5, 0.5, 1, ..., 1]
 			var input = board.m_Board.Cast<int>().Select(p => p / 2.0 + 0.5).ToArray();
 			Inputs.Add(input);
-			var guess = IA.Predict(input);
-			var expected = guess.ToArray();
-			var learnRules = false;
-			
-			for (int i = 0; i < NInput; i++)
+			Random random = new Random(Guid.NewGuid().GetHashCode());
+			double[] guess;
+			//exploitation
+			if (TrainingMode || random.Next(10) < 8)
 			{
-				if (input[i] != 0.5 && guess[i] != 0)
+				guess = IA.Predict(input);
+				var expected = guess.ToArray();
+				bool learnRules;
+				
+				if (!TrainingMode)
+					return SelectPositionFromGuesses(guess, board);
+				
+				do
 				{
-					learnRules = true;
-					expected[i] = 0;
-				}
-			}
-			
-			if(learnRules)
-				IA.Train(input, expected);
+					learnRules = false;
+					for (int i = 0; i < NInput; i++)
+					{
+						if (input[i] != 0.5)
+						{
+							expected[i] = 0;
+							if (guess[i] > 0.1)
+							{
+								learnRules = true;
+							}
+						}
+					}
 
-			return SelectPositionFromGuesses(guess, board);
+					if (learnRules)
+					{
+						HasToLearn++;
+						IA.Train(input, expected);
+						guess = IA.Predict(input);
+					}
+
+				} while (learnRules);
+				return SelectPositionFromGuesses(guess, board);
+			}
+			//exploration
+			var n = random.Next(input.Count(i => i == 0.5));
+			int ii = 0;
+			int position = 0;
+			foreach (var item in input)
+			{
+				if (ii == n)
+				{
+					GuessPosition.Add(position);
+					return ToPosition(position);
+				}
+				if (item == 0.5)
+				{
+					ii++;
+				}
+				position++;
+			}
+
+			throw new GameLogicException("The IA Couldnot find a position to play !!");
 		}
 
 
 		internal override void ProcessEndGame(bool hasWon)
 		{
-			if (hasWon)
+			base.ProcessEndGame(hasWon);
+			if (hasWon && !TrainingMode)
 			{
-				NumberOfGamesWon++;
 				int i = 0;
 				foreach (var input in Inputs)
 				{
-					var expected = input.ToArray();
-					expected[GuessPosition[i++]] = 1;
-					IA.Train(input, expected);
+					for (int j = 0; j <= i; j++)
+					{
+						var expected = input.Select(e => { return (e == 0.5) ? 0.0 : 1.0; }).ToArray();
+						expected[GuessPosition[i]] = 1;
+						IA.Train(input, expected);
+					}
+					i++;
 				}
 			}
+			//else
+			//{
+			//	for (int j = 0; j < 20; j++)
+			//	{
+			//		int i = 0;
+			//		foreach (var input in Inputs)
+			//		{
+			//			var expected = new double[input.Length];
+			//			expected[GuessPosition[i++]] = 0;
+			//			IA.Train(input, expected);
+			//		}
+			//	}
+			//}
+
+			GuessPosition.Clear();
+			Inputs.Clear();
+			if (NumberOfGamesWon % 1000 == 0)
+			{
+				NumberOfWrongPositions.Add(HasToLearn);
+			}
+			HasToLearn = 0;
 		}
 
 		private string SelectPositionFromGuesses(double[] guess, Board board)
@@ -90,23 +160,5 @@ namespace SimpleGames.Players
 			return ToPosition(position);
 		}
 
-		private string ToPosition(int position)
-		{
-			switch (position)
-			{
-				case 0:
-					return "a1";
-				case 1: return "a2";
-				case 2: return "a3";
-				case 3: return "b1";
-				case 4: return "b2";
-				case 5: return "b3";
-				case 6: return "c1";
-				case 7: return "c2";
-				case 8: return "c3";
-			}
-
-			throw new Exception($"Wrong position: {position}");
-		}
 	}
 }
