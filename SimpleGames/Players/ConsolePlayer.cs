@@ -11,14 +11,14 @@ namespace SimpleGames.Players
 
 		}
 
-		public override string Play()
+		public override string Play(Board board)
 		{
 			string entree;
 			while (true)
 			{
 				Console.WriteLine($"[{Name}]'s turn:");
 				entree = Console.ReadLine();
-				if(entree.Length == 2);
+				if(entree.Length == 2)
 					return entree;
 			}
 		}

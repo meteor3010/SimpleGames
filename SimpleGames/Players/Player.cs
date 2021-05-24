@@ -13,6 +13,11 @@ namespace SimpleGames.Players
 			Name = name;
 		}
 
-		public abstract string Play();
+		public abstract string Play(Board board);
+
+		internal virtual void ProcessEndGame(bool hasWon)
+		{
+
+		}
 	}
 }

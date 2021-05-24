@@ -35,6 +35,11 @@ namespace SimpleGames.TicTacToe
 
 		public override void Render()
 		{
+			if (!Mode.RenderOn)
+			{
+				return;
+			}
+
 			Console.Clear();
 			for (int i = 0; i < 3; i++)
 			{

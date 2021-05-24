@@ -33,14 +33,14 @@ namespace SimpleGames
 				{
 					do
 					{
-						position = Player1.Play();
+						position = Player1.Play(Board);
 					} while (!IsValid(position));
 				}
 				else
 				{
 					do
 					{
-						position = Player2.Play();
+						position = Player2.Play(Board);
 					} while (!IsValid(position));
 				}
 
@@ -50,19 +50,25 @@ namespace SimpleGames
 				IsPlayer1Turn = !IsPlayer1Turn;
 			}
 
-			if (Winner != null)
-			{
-				RenderPlayerWon(Player1);
-			}
-			else
-			{
-				Console.WriteLine("!! This is a tie !!");
-			}
+			ProcessEndGame(Winner);
 		}
 
-		private void RenderPlayerWon(Player player)
+		private void ProcessEndGame(Player player)
 		{
-			Console.WriteLine($"!!! {player.Name} has won !!!");
+			Player1.ProcessEndGame(player == Player1);
+			Player2.ProcessEndGame(player == Player2);
+
+			if (Mode.RenderOn)
+			{
+				if (player != null)
+				{
+					Console.WriteLine($"!!! {player.Name} has won !!!");
+				}
+				else
+				{
+					Console.WriteLine("!! This is a tie !!");
+				}
+			}
 		}
 
 		protected abstract void Play(string position);

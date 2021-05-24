@@ -36,7 +36,7 @@ namespace SimpleGames.TicTacToe
 
 				if (Board.HasWinner())
 				{
-					GameIsOver = false;
+					GameIsOver = true;
 					Winner = Player2;
 				}
 			}
