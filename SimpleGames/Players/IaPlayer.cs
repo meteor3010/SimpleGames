@@ -11,9 +11,9 @@ namespace SimpleGames.Players
 	{
 		private int NInput;
 		public DeepLearning IA { get; set; }
-		private int NOutput = 9;
-		private int NeuronsPerLayers = 18;
-		private int NLayers = 2;
+		private int NOutput;
+		private int NeuronsPerLayers;
+		private int NLayers;
 		private readonly List<double[]> Inputs;
 		private readonly List<int> GuessPosition;
 		public bool FirstPlayer { get; set; }
@@ -26,7 +26,7 @@ namespace SimpleGames.Players
 		{
 			NInput = 9;
 			NOutput = 9;
-			NeuronsPerLayers = 18;
+			NeuronsPerLayers = 36;
 			NLayers = 2;
 
 			IA = new DeepLearning(NInput, NeuronsPerLayers, NOutput, NLayers);
@@ -81,11 +81,8 @@ namespace SimpleGames.Players
 			var expected = guess.ToArray();
 			bool learnRules;
 
-			if (!TrainingMode)
-				return SelectPositionFromGuesses(guess, board);
-
-			do
-			{
+			//do
+			//{
 				learnRules = false;
 				for (int i = 0; i < NInput; i++)
 				{
@@ -106,7 +103,7 @@ namespace SimpleGames.Players
 					guess = IA.Predict(input);
 				}
 
-			} while (learnRules);
+			//} while (learnRules);
 			return SelectPositionFromGuesses(guess, board);
 		}
 
@@ -118,7 +115,7 @@ namespace SimpleGames.Players
 				int i = 0;
 				foreach (var input in Inputs)
 				{
-					for (int j = 0; j <= i*10; j++)
+					for (int j = 0; j <= i*2; j++)
 					{
 						var expected = input.Select(e => 0.0).ToArray();
 						expected[GuessPosition[i]] = 1;

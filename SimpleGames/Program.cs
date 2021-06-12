@@ -84,10 +84,9 @@ namespace SimpleGames
 			}
 		}
 
-		private static void IaVsRandom()
+		private static void IaVsUntrainedIa()
 		{
 			{
-
 				Mode.RenderOn = false;
 				var p1 = new IaPlayer("robot1", false) { FirstPlayer = true };
 				var path = @"C:\Users\Boudart Loic\source\repos\SimpleGames\SimpleGames\TicTacToe\Brains\brain.json";
@@ -95,7 +94,8 @@ namespace SimpleGames
 				{
 					p1.IA.Load(path);
 				}
-				var p2 = new IaPlayer("robot1", false) { FirstPlayer = false };
+				var p2 = new IaPlayer("robot2", false) { FirstPlayer = false };
+				p1.IA = p2.IA;
 				for (int i = 0; i < 100000; i++)
 				{
 					P1turn = !P1turn;
